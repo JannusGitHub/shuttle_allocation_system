@@ -128,33 +128,40 @@ function editRoutesStatus(){
     });
 }
 
-function getRoutes(cboElement){
-	let result = '<option value="0" disabled selected>Select One</option>';
-	$.ajax({
-		url: 'get_routes',
-		method: 'get',
-		dataType: 'json',
-		beforeSend: function(){
-			result = '<option value="0" disabled>Loading</option>';
-			cboElement.html(result);
-		},
-		success: function(response){
-			let disabled = '';
-			if(response['routesData'].length > 0){
-				result = '<option value="0" disabled selected>Select One</option>';
-				for(let index = 0; index < response['routesData'].length; index++){
-                    result += '<option value="' + response['routesData'][index].id + '">' + response['routesData'][index].routes_name + '</option>';
-				}
-			}
-			else{
-				result = '<option value="0" disabled>No Routes Role found</option>';
-			}
-			cboElement.html(result);
-		},
-		error: function(data, xhr, status){
-			result = '<option value="0" disabled>Reload Again</option>';
-			cboElement.html(result);
-            console.log('Data: ' + data + "\n" + "XHR: " + xhr + "\n" + "Status: " + status);
-        }
-	});
+function getRoutes(cboElement, routesId){
+    return new Promise((resolve, reject) => {
+        let result = '<option value="0" disabled selected>Select One</option>';
+        $.ajax({
+            url: 'get_routes',
+            method: 'get',
+            dataType: 'json',
+            beforeSend: function(){
+                result = '<option value="0" disabled>Loading</option>';
+                cboElement.html(result);
+            },
+            success: function(response){
+                resolve(response)
+                let disabled = '';
+                if(response['routesData'].length > 0){
+                    result = '<option value="0" disabled selected>Select One</option>';
+                    for(let index = 0; index < response['routesData'].length; index++){
+                        result += '<option value="' + response['routesData'][index].id + '">' + response['routesData'][index].routes_name + '</option>';
+                    }
+                    console.log('routesId ', routesId);
+                    $("#selectRoutes").val(routesId).trigger('change');
+                }
+                else{
+                    result = '<option value="0" disabled>No Routes Role found</option>';
+                }
+                cboElement.html(result);
+            },
+            error: function(data, xhr, status){
+                reject(data)
+                result = '<option value="0" disabled>Reload Again</option>';
+                cboElement.html(result);
+                console.log('Data: ' + data + "\n" + "XHR: " + xhr + "\n" + "Status: " + status);
+            }
+        });
+    });
+	
 }

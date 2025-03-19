@@ -1,37 +1,29 @@
+
 @php
     $isLogin = false;
-    $shuttle_allocation_user_role_id = null;
-
-    if (!isset($_SESSION)) {
-        session_start(); // ❌ Remove if using Laravel session system
+    if(!isset($_SESSION)){
+        session_start();
     }
-
-    $layout = null;
-
-    if (isset($_SESSION['rapidx_user_id'])) {
+    $layout = "";
+    if(isset($_SESSION['rapidx_user_id'])){
         $isLogin = true;
-        $user_level_id = $_SESSION['rapidx_user_level_id'] ?? null;
-        $rapidx_user_id = $_SESSION["rapidx_user_id"] ?? null;
-        $shuttle_allocation_user_role_id = $_SESSION["shuttle_allocation_user_role_id"] ?? null;
+        $user_level_id = $_SESSION['rapidx_user_level_id']; 
+        $rapidx_user_id =  $_SESSION["rapidx_user_id"];
+        $shuttle_allocation_user_role_id =  $_SESSION["shuttle_allocation_user_role_id"];
     }
 
-    switch ($shuttle_allocation_user_role_id) {
-        case 1:
-            $layout = "layouts.admin_layout";
-            break;
-        case 2:
-            $layout = "layouts.person_incharge_layout";
-            break;
-        case 3:
-            $layout = "layouts.superior_layout";
-            break;
-        default:
-            echo view('errors.unauthorized'); // ✅ Directly render the unauthorized error page
-            exit; // ✅ Stop further execution
-    }
+    // echo $shuttle_allocation_user_role_id;
 @endphp
 
-@extends($layout) {{-- ✅ Will only be executed if a valid layout exists --}}
+@php
+    if($shuttle_allocation_user_role_id == 1){
+        $layout  = "layouts.admin_layout";
+    }else if($shuttle_allocation_user_role_id == 2){
+        $layout = "layouts.person_incharge_layout";
+    }else if($shuttle_allocation_user_role_id == 3){
+        $layout = "layouts.superior_layout";
+    }
+@endphp
 
 @if ($shuttle_allocation_user_role_id == 1)
     @section('title', 'Dashboard')
@@ -148,3 +140,5 @@
         </script>
     @endsection
 @endif
+
+@extends($layout)

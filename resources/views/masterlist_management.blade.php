@@ -1,4 +1,14 @@
-@extends('shared.includes.session')
+{{-- @extends('shared.includes.session') --}}
+
+@if (file_exists(resource_path('views/shared/includes/session.blade.php')))
+    @extends('shared.includes.session')
+@else
+    @php
+        echo '<script type="text/javascript">
+                window.location = "/";
+            </script>';
+    @endphp
+@endif
 
 @section('title', 'Dashboard')
 @section('content_page')
@@ -43,7 +53,7 @@
                                                 <th>Status</th>
                                                 <th>Employee #</th>
                                                 <th>Employee name</th>
-                                                <th>Incoming</th>
+                                                <th>Incoming</th>   
                                                 <th>Outgoing</th>
                                                 <th style="min-width: 300px; width: 300px;">Routes</th>
                                                 <th>Gender</th>
@@ -86,7 +96,7 @@
                                     <input type="text" class="form-control" style="display: none" name="systemone_id" id="systemoneId">
                                     
                                     <div class="mb-3">
-                                        <label for="selectEmployeeNumber" class="form-label">Select Type<span class="text-danger" title="Required">*</span></label>
+                                        <label for="selectEmployeeType" class="form-label">Select Type<span class="text-danger" title="Required">*</span></label>
                                         <select class="form-select" id="selectEmployeeType" name="employee_type">
                                             <option value="0" selected disabled >Select One</option>
                                             <option value="1">Pricon</option>
@@ -230,7 +240,8 @@
              * Initialize Select2 Elements
             */
             $('.select2').select2({
-                theme: 'bootstrap-5'
+                theme: 'bootstrap-5',
+                dropdownParent: $('#modalAddMasterlist')
             });
 
             /**
@@ -269,6 +280,7 @@
             });
 
             $("select#selectEmployeeType").on('change',function(){
+                // console.log('selectEmployeeType onchange');
                 let selectedEmployeeType = $(this).children("option:selected").attr('value');
                 $("input[name='masterlist_id']", $('#formAddMasterlist')).val('');
                 $('#textEmployeeName').val('');
@@ -283,9 +295,19 @@
 
                 if(selectedEmployeeType != 0){
                     $('select#selectEmployeeName').prop('disabled', false);
-                    getEmployees($('#selectEmployeeName'), selectedEmployeeType);
-                    $('select#selectRoutes').prop('disabled', false);
-                    getRoutes($('#selectRoutes'));
+
+                    getEmployees($('#selectEmployeeName'), selectedEmployeeType).then((response) => {
+                        console.log('response ', response);
+                    }).catch((error) => {
+                        console.log('error ', error);
+                    });
+
+                    getRoutes($('#selectRoutes')).then((response) => {
+                        console.log('response ', response);
+                        $('select#selectRoutes').prop('disabled', false);
+                    }).catch((error) => {
+                        console.log('error ', error);
+                    });
                 }
             });
 
@@ -330,7 +352,7 @@
                     data: function (param){
                         param.rapidXUserId = txtGlobalUserId;
                     },
-                }, 
+                },
                 "columns":[
                     { "data" : "action", orderable:false, searchable:false},
                     { "data" : "masterlist_status"},
@@ -361,7 +383,7 @@
 
             $(document).on('click', '.actionEditMasterlist', function(){
                 let id = $(this).attr('masterlist-id');
-                console.log('id ',id);
+                // console.log('id ',id);
                 $("input[name='masterlist_id'", $("#formAddMasterlist")).val(id);
                 getMasterlistById(id);
             });
